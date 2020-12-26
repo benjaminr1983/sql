@@ -1,0 +1,570 @@
+#+STARTUP: overview
+* Basic Queries
+  In Order to start with SQL you must first create a DB. 
+  #+BEGIN_SRC sql
+  -- create the database
+  CREATE DATABASE <db_name>;
+  -- show all DB's
+  SHOW DATABASES;
+  #+END_SRC
+
+** Basic Rules
+   - /Before you are starting to create a table structure you should think about how to structure your DB (DB-Design)./
+   - /every predefined Keyword should be written in CAP/
+   - /everything created by you should be written without CAP and according to nameing convention you are defining/
+   - /Every Query must end with *;*/
+   - /you can write everything in oneline but as you progress the Queries are getting mor complicated and with a clean writing you will have an easier time./
+   - /As with everything it is important to document everything you do, so everybody can understand what you were trying to achieve./
+   - /always include the <table_name> in the queries as well as this simplifies things in the future. so if you are writing a query and you want to know what is written in column x in atable you always should query it like "<db_name>.<table_name>./
+
+** Basic Queries
+   Basically what we are saying with the first query is *create* a *table* with 2 *columns* of which the first contains only *integers* and the second consists of text. the first column is the *primary key* to identify the entries in the table.
+   #+BEGIN_SRC sql
+     -- create a table in the DB
+     CREATE TABLE <table_name> (
+     -- define the columns of the table
+             <column_1> INT,
+	     <column_2> VARCHAR(40),
+	     PRIMARY KEY(<table_name>)
+     );
+   #+END_SRC
+
+   Now you want to see what you created.
+   #+BEGIN_SRC sql
+   DESCRIBE <table_name>;
+   #+END_SRC
+
+   Now we want to read sepecific information of the table. What we are querying here for is *show* me everything *from* <db_name>.<table_name>  
+   #+BEGIN_SRC sql
+     SELECT * FROM <table_name>;
+   #+END_SRC
+
+   now we want to delete a table
+   #+BEGIN_SRC sql
+   DROP TABLE <table_name>;
+   #+END_SRC
+
+   now we want to change a table (we can also say we want to alter it), the new cloumn will hold *decimal* numbers
+   #+BEGIN_SRC sql
+   -- we are adding a column
+   ALTER TABLE <table_name> ADD <column_3> DECIMAL(5,2);
+   -- we are deleting this column again
+   ALTER TABLE <table_name> DROP COLUMN <column_3>;
+   #+END_SRC
+
+   now we want to insert values in the table we just created, when we are not specifically defining the command to only insert certain values we have to enter values for all columns
+   #+BEGIN_SRC sql
+   -- all values
+   INSERT INTO <table_name> VALUES(1,lorem ipsum,2.25);
+   -- only values for column_1 and column_3
+   INSERT INTO <table_name>(<column_1>, <column_3>) VALUES(2,3.56);
+   #+END_SRC
+
+** creating tables with default settings
+   When you want to create entries in a DB some values must have certain standard values as not every entry will contain values for all columns. Furthermore some columns are to be numbered and then you want to have the values entered automatically.
+   #+BEGIN_SRC sql
+   CREATE TABLE <table_name> (
+   -- auto increment the id column
+           <id_column> INT AUTO_INCREMENT,
+   -- columns that connot be empty
+           <column_1> VARCHAR(40) NOT NULL,
+   -- columns with a defaultsetting
+           <column_2> VARCHAR(40) UNIQUE DEFAULT 'N/A',
+   -- choose the primary key of the table 
+           PRIMARY KEY(<id_column>)
+   );
+   #+END_SRC
+
+   alter the table by adding another column that has a default setting of *'0.00'*
+   #+BEGIN_SRC sql
+   ALTER TABLE <table_name> ADD <column_3> DECIMAL(5,2) DEFAULT '0.00';
+   #+END_SRC
+
+   when you are now inserting values you do not need to fill the id_column as this will be filled automatically.
+   #+BEGIN_SRC sql
+   INSERT INTO <table_name>(<column_1>, <column_2>, <column_3>) VALUES('Jack', 'Sport', '2.15');
+   #+END_SRC
+
+** updating tables
+   If you want to update existing rows you can use the following examples. You can change specific values or you can use relative values but the you will have to use operators.
+
+   update all columns 
+   #+BEGIN_SRC sql
+   -- do an update in table_name
+   UPDATE <table_name>
+   -- set all values in column_2 to undecided
+   SET <column_2>='undecided';
+   #+END_SRC
+
+   specific update
+   #+BEGIN_SRC sql
+   -- do an update in table_name
+   UPDATE <table_name>
+   -- set a new value in column_2
+   SET <column_2>='new_value'
+   -- condition: when the original value in column_2 is ...
+   WHERE <column_2>='original_value'
+   #+END_SRC
+
+   relative update
+   #+BEGIN_SRC sql
+   -- do an update in table_name
+   UPDATE <table_name>
+   -- set a new value in column_2
+   SET <column_2>='new_value'
+   -- condition: where the id is greater 5
+   WHERE <id_column> > 5;
+   #+END_SRC
+
+   delete a row | with *DROP* you are deleting a column with *DELETE* you are deleting a row.
+   #+BEGIN_SRC sql
+   -- delete row from table_name
+   DELETE FROM <table_name>
+   -- conditions for the deletion
+   WHERE <column_2>='new_value' OR <column_2>='original_value' AND <column_3> > 1;
+   #+END_SRC
+
+** basic select Queries
+   For *Select* Queries it is important to know that if you do not specify the search with the particular tables/ columns you use the '*' which tells the system that you want to search all the columns. 
+   
+   search the all columns in the table but only when the column_2 has a certain value.
+   #+BEGIN_SRC sql
+   -- search everything
+   SELECT *
+   FROM <table_name>
+   -- condition: column_2 has a certain value
+   WHERE <table_name>.<column_2> ='certain_value';
+   #+END_SRC
+
+   search all columns in the table but only if column_2 has one of 2 certain values.
+   #+BEGIN_SRC sql
+   -- search everything
+   SELECT * 
+   FROM <table_name>
+   -- if the column_2 has one of 2 VALUES
+   WHERE <table_name>.<column_2> IN ('certain_value_1','certain_value_2');
+   #+END_SRC
+
+   search only 2 columns of the table and order the results *descending* by column_2 and id_column
+   #+BEGIN_SRC sql
+   -- search specific columns
+   SELECT <table_name>.<id_column>, <table_name>.<column_2>
+   FROM <table_name>
+   -- order it descending by column_2 and id_column
+   ORDER BY <table_name>.<column_2>, <table_name>.<id_column> DESC
+   -- show only 2 results
+   LIMIT 2;
+   #+END_SRC
+
+* advanced Queries
+  Here we will create a simple sales structure with different branches and customers. Generally it is recommendable to make yourself a plan (DB Design) in order to start a proper DB.
+
+** creating the test_db  
+
+  _1. creating the tables._
+  the employee table cannot be connected completely in the beginning, as the references do not exist yet.
+  #+BEGIN_SRC sql
+  CREATE TABLE employee (
+  -- the employee_id has to be unique is created automatically and the primary key
+          employee_id INT AUTO_INCREMENT UNIQUE PRIMARY KEY,
+  -- all the other fields must have values inserted
+          first_name VARCHAR(40) NOT NULL,
+	  last_name VARCHAR(40) NOT NULL,
+	  birth_date DATE NOT NULL, 
+	  sex VARCHAR(1) NOT NULL,  
+	  salary INT NOT NULL, 
+	  supervisor_id INT NOT NULL, 
+	  branch_id INT NOT NULL
+  );
+  #+END_SRC
+
+  the branch table
+  #+BEGIN_SRC sql
+  CREATE TABLE branch (
+  -- the branch_id will be unique and created automatically with the primary key
+          branch_id INT AUTO_INCREMENT UNIQUE PRIMARY KEY,
+  -- the manager_id will be created manually and will be inserted later on 
+          manager_id INT,
+  -- the other values must have values inserted
+          branch_name VARCHAR(40) NOT NULL,
+	  manager_start_date DATE NOT NULL,
+  -- now we are defining the foreign keys as the reference we will take the employee_id from the employee_table and should the employee be deleted it will be set to NULL
+          FOREIGN KEY(manager_id) REFERENCES employee(employee.employee_id) ON DELETE SET NULL
+  );
+  #+END_SRC
+
+  connect the relevant rows
+  #+BEGIN_SRC sql
+  -- alter the employee_table
+  ALTER TABLE employee
+  -- which key should be added to which column
+  ADD FOREIGN KEY (employee.branch_id)
+  -- what is the reference for that key
+  REFERENCES branch(branch.branch_id)
+  -- how will this key act if the reference is deleted
+  ON DELETE SET NULL;
+  -- the same we do for the supervisor_id
+  
+  ALTER TABLE employee
+  ADD FOREIGN KEY (employee.supervisor_id)
+  REFERENCES employee(employee.employee_id)
+  ON DELETE SET NULL;
+  #+END_SRC
+
+  create the client_table
+  #+BEGIN_SRC sql
+  CREATE TABLE client (
+          client_id INT AUTO_INCREMENT UNIQUE PRIMARY KEY,
+	  client_name VARCHAR(40) NOT NULL,
+	  branch_id INT,
+	  FOREIGN KEY (client.branch_id) REFERENCES branch(branch.branch_id) ON DELETE SET NULL
+  );
+  #+END_SRC
+
+  create works_with_table
+  #+BEGIN_SRC sql
+  CREATE TABLE works_with (
+          employee_id INT,
+	  client_id INT,
+	  total_sales INT NOT NULL,
+	  PRIMARY KEY (works_with.employee_id, works_with.client_id),
+	  FOREIGN KEY (works_with.employee_id) REFERENCES employee(employee.employee_id) ON DELETE CASCADE,
+	  FOREIGN KEY (works_with.client_id) REFERENCES client(client.client_id) ON DELETE CASCADE
+  );
+  #+END_SRC
+
+  create branch_supplier_table
+  #+BEGIN_SRC sql
+  CREATE TABLE branch_supplier (
+          branch_id INT,
+	  supplier_name VARCHAR(40),
+	  supplier_type VARCHAR(40) NOT NULL,
+	  PRIMARY KEY (branch_supplier.branch_id, branch_supplier.supplier_name),
+	  FOREIGN KEY (branch_supplier.branch_id) REFERENCES branch(branch.branch_id) ON DELETE CASCADE
+  );
+  #+END_SRC
+
+  _2. Insert values into the tables_
+
+  #+BEGIN_SRC sql
+  -- as we activated AUTO_INCREMENT we do not need to fill the first fields
+  -- supervisor_id and branch_id must be set to null as no branch value exists yet
+  INSERT INTO employee VALUES('David', 'Wallace', '1967-11-17','m', 250000, NULL, NULL);
+
+  -- branch entry is being created
+  INSERT INTO branch VALUES('Corporate', '1', '2006-02-09');
+
+  -- employee entry is being updated
+  UPDATE employee
+  SET branch_id=1
+  WHERE employee_id=1;
+
+  -- continue inserting
+  INSERT INTO employee VALUES('Jan','Levinson', '1961-05-11','F', 110000, 1, 1);
+
+  -- continue with the next branch
+  INSERT INTO employee VALUES('Micheal','Scott', '1964-03-15','M', 75000, NULL, NULL);
+
+  INSERT INTO branch VALUES('Scranton', 3, '1992-04-06');
+
+  UPDATE employee 
+  SET supervisor_id = 1, branch_id = 2
+  WHERE employee_id = 3;
+
+  INSERT INTO employee VALUES('Angela','Martin', '1971-06-25','F', 63000, 3, 2);
+  INSERT INTO employee VALUES('Kelly','Kapoor', '1980-02-05','F', 55000, 3, 2);
+  INSERT INTO employee VALUES('Stanley','Hudson', '1958-02-19','M', 69000, 3, 2);
+
+  -- finish with the last branch
+  INSERT INTO employee VALUES('Josh','Porter', '1969-09-05','M', 78000, 1, NULL);
+
+  INSERT INTO branch VALUES('Stamford', 7, '1998-02-13');
+
+  UPDATE employee 
+  SET branch_id = 3
+  WHERE employee_id = 7;
+
+  INSERT INTO employee VALUES('Andy','Bernard', '1973-07-22','M', 65000, 7, 3);
+  INSERT INTO employee VALUES('Jim','Halpert', '1978-10-01','M', 71000, 7, 3);
+
+  -- branch supplier 
+  INSERT INTO branch_supplier VALUES(2, 'Hammer Mill', 'Paper');
+  INSERT INTO branch_supplier VALUES(2, 'Uni-ball', 'Writing Utensils');
+  INSERT INTO branch_supplier VALUES(3, 'Patriot Paper', 'Paper');
+  INSERT INTO branch_supplier VALUES(2, 'J.T Forms & Labels', 'Custom Forms');
+  INSERT INTO branch_supplier VALUES(3, 'Uni-ball', 'Writing Utensils');
+  INSERT INTO branch_supplier VALUES(3, 'Hammer Mill', 'Paper');
+  INSERT INTO branch_supplier VALUES(3, 'Stamford Labels', 'Custom Forms');
+
+  -- client
+  INSERT INTO client VALUES(400, 'Dunmore Highschool', 2);
+  INSERT INTO client VALUES(401, 'Lackawana Country', 2);
+  INSERT INTO client VALUES(402, 'FedEx', 3);
+  INSERT INTO client VALUES(403, 'John Daly Law, LLC', 3);
+  INSERT INTO client VALUES(404, 'Scranton Whitepages', 2);
+  INSERT INTO client VALUES(405, 'Times Newspaper', 3);
+  INSERT INTO client VALUES(406, 'FedEx', 2);
+
+  -- works_with
+  INSERT INTO works_with VALUES(6, 400, 55000);
+  INSERT INTO works_with VALUES(3, 401, 267000);
+  INSERT INTO works_with VALUES(9, 402, 22500);
+  INSERT INTO works_with VALUES(8, 403, 5000);
+  INSERT INTO works_with VALUES(9, 403, 12000);
+  INSERT INTO works_with VALUES(6, 404, 33000);
+  INSERT INTO works_with VALUES(8, 405, 26000);
+  INSERT INTO works_with VALUES(3, 406, 15000);
+  INSERT INTO works_with VALUES(6, 406, 130000);
+  #+END_SRC
+
+** extracting information of the created tables
+
+  _1. basic SELECT Statements_
+  
+  #+BEGIN_SRC sql
+  -- find all employee's
+  SELECT *
+  FROM employee;
+
+  -- find all employee's ordered descending by salary
+  SELECT * 
+  FROM employee
+  ORDER BY employee.salary DESC;
+
+  -- find all employee's ordered by sex than name 
+  SELECT * 
+  FROM employee
+  ORDER BY employee.sex, employee.first_name, employee.last_name;
+
+  -- find the first employee's in the table
+  SELECT * 
+  FROM employee
+  LIMIT 5;
+
+  -- find the first and last name of all employee's
+  SELECT employee.first_name, employee.last_name
+  FROM employee;
+
+  -- fine the forname and surname of all employee's
+  SELECT employee.first_name AS forname , employee.last_name AS surname
+  FROM employee;
+
+  -- find out all the different genders
+  SELECT DISTINCT employee.sex
+  FROM employee;
+  #+END_SRC
+
+  _2. advanced SELECT Statements_
+  
+  #+BEGIN_SRC sql
+  -- find the number of employee's
+  SELECT COUNT(employee.employee_id)
+  FROM employee;
+
+  -- find the number of female employee's born after 1970
+  SELECT COUNT(employee.employee_id)
+  FROM employee
+  WHERE sex = 'f' AND employee.birth_date > '1971-01-01';
+
+  -- find the average of all employee's salaries
+  SELECT AVG(employee.salary)
+  FROM employee;
+
+  -- find the sum of all employees salaries
+  SELECT SUM(employee.salary)
+  FROM employee;
+
+  -- how many males and females are there
+  SELECT COUNT(employee.sex), employee.sex
+  FROM employee
+  GROUP BY employee.sex;
+
+  -- find the total sales of each sales man 
+  SELECT SUM(works_with.total_sales), works_with.employee_id
+  FROM works_with
+  GROUP BY works_with.employee_id;
+
+  -- find the total revenue by client
+  SELECT SUM(works_with.total_sales), works_with.client_id
+  FROM works_with
+  GROUP BY works_with.client_id;
+  #+END_SRC
+
+  _3. advanced SELECT Statements | Wildcard_
+
+  #+BEGIN_SRC sql
+  -- "%" you query some with any number of characters
+  -- "_" you query one character 
+  
+  -- find any client that are LLC | at the end of any entry must be 'LLC'
+  SELECT * 
+  FROM client
+  WHERE client.client_name LIKE '%LLC';
+
+  -- find any branch supplier who are in the label business | in any entry must be 'Label'
+  SELECT * 
+  FROM branch_supplier
+  WHERE branch_supplier.supplier_name LIKE '% Label%';
+
+  -- find any employee born in october | in the month portion of the birthdate the '10' must be there
+  SELECT * 
+  FROM employee
+  WHERE employee.birth_date LIKE '____-10%';
+
+  -- find any clients who might be schools | the term school must be found anywhere in the clientname
+  SELECT * 
+  FROM client
+  WHERE client.client_name LIKE '%school%';
+  #+END_SRC
+
+  _4. advanced SELECT Statements | UNION_
+
+  #+BEGIN_SRC sql
+  -- use this in order to combine results from different tables
+
+  -- find a list of employee and brand names
+  SELECT employee.first_name
+  FROM employee
+  UNION
+  SELECT branch.branch_name
+  FROM branch
+  UNION
+  SELECT client.client_name
+  FROM client;
+
+  -- find a list of all clients and brnachsuppliers' names
+  SELECT client.client_name, client.branch_id
+  FROM client
+  UNION
+  SELECT branch_supplier.supplier_name, branch_supplier.branch_id
+  FROM branch_supplier;
+
+  -- find a list of all the money spend and earned by the company
+  SELECT employee.salary
+  FROM employee
+  UNION
+  SELECT works_with.total_sales
+  FROM works_with;
+  #+END_SRC
+
+  _5. advanced SELECT Statements | JOIN_
+
+  #+BEGIN_SRC sql
+  -- find all branches and the names of their managers
+  -- inner JOIN | returns matching values of both tables
+  SELECT employee.employee_id, employee.first_name, employee.last_name, branch.branch_name
+  FROM employee
+  INNER JOIN branch
+  ON employee.employee_id = branch.manager_id;
+
+  -- left JOIN | returns all records of the left table 
+  SELECT employee.employee_id, employee.first_name, employee.last_name, branch.branch_name
+  FROM employee
+  LEFT JOIN branch
+  ON employee.employee_id = branch.manager_id;
+
+  -- right JOIN | returns all records of the right table 
+  SELECT employee.employee_id, employee.first_name, employee.last_name, branch.branch_name
+  FROM employee
+  RIGHT JOIN branch
+  ON employee.employee_id = branch.manager_id;
+
+  -- outer JOIN | returns values where there's a match in the left or right table 
+  -- This is not supported by all SQL languages
+  SELECT employee.employee_id, employee.first_name, employee.last_name, branch.branch_name
+  FROM employee
+  OUTER JOIN branch
+  ON employee.employee_id = branch.manager_id
+  WHERE employee.employee_id = branch.branch_id;
+  #+END_SRC
+
+  _6. basic NESTED QUERY_
+  
+  #+BEGIN_SRC sql
+  -- find the names of all employee's who have sold over 30,000 to a single client
+  SELECT employee.first_name, employee.last_name
+  FROM employee
+  WHERE employee.employee_id IN (
+            SELECT works_with.employee_id
+	    FROM works_with
+	    WHERE works_with.total_sales > 30000
+  );
+  
+  -- find all clients who are handled by the branch that Micheal Scott manages | assume you Micheals ID
+  SELECT client.client_name
+  FROM client
+  WHERE client.branch_id = (
+           SELECT branch.branch_id
+	   FROM branch
+	   WHERE branch.manager_id = 3
+	   LIMIT 1
+  );
+  #+END_SRC
+
+  _7. basic DELETE_
+
+  #+BEGIN_SRC sql
+  -- delete set NULL | sets the values to 0 in the referential tables
+  DELETE FROM employee
+  WHERE employee.employee_id = 3;
+
+  -- Test
+  SELECT * 
+  FROM branch;
+
+  -- delete set cascade | allows to delete values from the parent table as soon as the child table is deleted
+  DELETE FROM branch
+  WHERE branch.branch_id = 2;
+
+  Test
+  SELECT * 
+  FROM branch_supplier;
+  #+END_SRC
+
+  _8. basic TRIGGER_
+  This is very good to log what is been happening to the DB.
+
+  #+BEGIN_SRC sql
+  -- create a table for logging
+  CREATE TABLE trigger_test (
+         message VARCHAR(100)
+  );
+
+  -- create the TRIGGER in Terminal
+  DELIMETER $$
+  CREATE 
+         TRIGGER my_trigger BEFORE INSERT 
+	 ON employee
+	 FOR EACH ROW BEGIN 
+	          INSERT INTO trigger_test VALUES('added new employee');
+         END$$
+  DELIMETER ;
+
+  -- create a specific row via TRIGGER in Terminal
+  DELIMITER $$
+  CREATE 
+	TRIGGER my_trigger BEFORE INSERT 
+	ON employee
+	FOR EACH ROW BEGIN 
+		INSERT INTO trigger_test VALUES(NEW.first_name);
+	END$$
+  DELIMITER ;
+
+  -- if | then via TRIGGER in Terminal
+  DELIMITER $$
+  CREATE 
+	Trigger my_trigger BEFORE INSERT 
+	ON employee
+	FOR EACH ROW BEGIN 
+		IF NEW.sex = 'M' THEN 
+			INSERT INTO trigger_test VALUES('added male employee');
+		ELSEIF NEW.sex = 'F' THEN
+			INSERT INTO trigger_test VALUES('added female');
+		ELSE
+			INSERT INTO trigger_test VALUES('added other employee');
+		END IF;
+	END$$
+  DELIMITER ;
+
+  -- can be done before, after and for insert, delete, update
+  #+END_SRC

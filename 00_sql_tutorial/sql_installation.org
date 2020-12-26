@@ -1,0 +1,141 @@
+#+STARTUP:  overview
+* Basics
+** What is a Databank
+
+| Name                                      | Abbrevaiation | Definition                                                                                                                                       | Examples           |
+|-------------------------------------------+---------------+--------------------------------------------------------------------------------------------------------------------------------------------------+--------------------|
+| Database                                  | DB            | - organized collection of structured information, data                                                                                           |                    |
+|                                           |               | - typically stored electronically in a computer system                                                                                           |                    |
+|                                           |               | - controlled by a database management system                                                                                                     |                    |
+|                                           |               | - data and DBMS with the applications associated with them are called a database system                                                          |                    |
+| Database Management System                | DBMS          | - manages the DB                                                                                                                                 |                    |
+|                                           |               | - is able to create, read, update, delete DB                                                                                                     |                    |
+| relational Database Management System     | RDBMS         | - uses the structured query language (SQL)                                                                                                       | - mySQL            |
+|                                           |               | - organized in tables, rows and columns                                                                                                          | - Oracle           |
+|                                           |               |                                                                                                                                                  | - postgresSQL      |
+|                                           |               |                                                                                                                                                  | - MariaDB          |
+| nonrelational Database Management System  | NRDBMS        | - uses nonstructured query language (NoSQL)                                                                                                      | - MongoDB          |
+|                                           |               | - organised in key-value cache, key-value store, tuple store, object database, document store, wide column store and native multi-model Database | - dynamoDB         |
+|                                           |               |                                                                                                                                                  | - Apache Cassandra |
+| objectoriented Database Management System | OODBMS        | - uses objectoriented query language (OQL)                                                                                                       |                    |
+|                                           |               | - organised tables, rows and columns yet it is not being mapped as clumn and row                                                                 |                    |
+|                                           |               |                                                                                                                                                  |                    |
+| Data Query Language                       | DQL           | - pulls information of the DB                                                                                                                    |                    |
+|                                           |               |                                                                                                                                                  |                    |
+| Data Definition Language                  | DDL           | - defines Schemas                                                                                                                                |                    |
+|                                           |               |                                                                                                                                                  |                    |
+| Data Control Language                     | DCL           | - User and permissions management                                                                                                                |                    |
+|                                           |               |                                                                                                                                                  |                    |
+| Data Manipulating Language                | DML           | - insert update and delete DB's                                                                                                                  |                    |
+|                                           |               |                                                                                                                                                  |                    |
+|-------------------------------------------+---------------+--------------------------------------------------------------------------------------------------------------------------------------------------+--------------------|
+
+** Entity Relationship Diagrams (ERD)
+
+    The ERD maps out the requirements you are having in a comprehensive table. It uses symbols and categories in order to show it in acomprehensive fashion. It can also be called a schema model. This will be automatically created in DBeaver.
+    
+    | Name                     | Purpose                                                                                                    | How is it displayed                                            |
+    |--------------------------+------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------|
+    | Entity                   | It shows what is about to be stored, usually this is the main table                                        | in a square                                                    |
+    | Attributes               | specific information of an entity or Relationship, usually the rows of a table                             | in an oval form                                                |
+    | primary key              | This is like an attribute with a special function, this is the main characteristic of a table              | in an oval form but with different coloring than the attribute |
+    | composite Attribute      | those are attributes that are stored in different attributes but are looked as as one block of information | in an oval form                                                |
+    | multivalues Attribute    | an Attribute that contains several information                                                             | in an oval form with 2 circles                                 |
+    | derived Attribute        | an Attribute that is derived from other Attributes                                                         | in an oval form but with a broken outline                      |
+    | Participation            | This describes how an Entity relates to another Entity                                                     | partial is described by a single line                          |
+    |                          |                                                                                                            | total is described by a double line                            |
+    | Relationship             | This is the description of the Relationship between several Entities                                       | this is described as a diamond                                 |
+    | Relationship Cardinality | Number of Instances of an Entity from a relation that can be associated with the relation                  | this is described either as 1, N, M                            |
+    | weak Entities            | An Entity that cannot be uniquely identified by its Attributes alone                                       | in a square with several outer lines                           |
+    | Identifying Relationship | A relationship that serves to uniquely identify the weak identity                                          | comparable to the primary key                                  |
+    |--------------------------+------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------|
+    
+** installing MariaDB
+    Install MariaDB via Terminal. As Debian is shipping with MariaDB we will be using this DB. I am using Debian based Systems and aptitude if you did not install aptitude replace it with apt. When you are using different Distros such as Arch or RedHat please change the installation. It is important to note that some Distributions (Arch, Debian etc.) are already featuring MariaDB in their repositories which is why you do not need to add the repositories.
+    #+BEGIN_SRC bash
+    # update your System
+      sudo aptitude update
+    # install the package mariadb-server | mariadb-client | mariadb-backup
+      sudo aptitude install mariadb-server mariadb-client mariadb-backup
+    # install the DBMS. I am prefering DBeaver for this but you can choose whatever you want
+      sudo apt install dbeaver 
+    #+END_SRC
+
+** configuring MariaDB
+    We will run the script: my_sql_secure_installation in order to secure our DB. This is important as Debian is using this DB with the automated system maintenance and changing this setup could harm the security of the Server or your device.
+    #+BEGIN_SRC bash
+      sudo mysql_secure_installation
+    #+END_SRC
+
+    Now you will have to answer 7 Queries:
+    1. First you will be asked to enter the root password as you currently don't have one simply press enter. It is strongly recommended to enter a password in the next step.
+    2. Secondly you should set your root password. As you will later on block the remote acces this is simply an additionnal layer of secrity so nobody, even if they can access the server, can change root settings.
+    3. Thirdly you will be asked to remove anonymous user. Those were necessary in order to set up the DB but they are not useful anymore so click "y".
+    4. Fourthly you will be asked to disallow root login remotely. This is strongly recommend to take as this increases the security of your DB considerably. Furthermore is that standard in the industry. So please click "y".
+    6. Fifthly you will be asked to remove the test_db and the access to it. Please do so as this DB is not needed anymore. So please click "y"
+    7. Finally you will be asked to reload the privileges table now. This takes all the changes in affect. So please click "y"
+
+    Now your DB is only accessible locally, which is fine if you are using your DB only locally and you are the sole user of this DB. Yet if you are creating DB's on a server you wnat other to have access to it. This will be described in the next step.
+
+** setting up remote access to the server
+    If you want to connect to the DB on a server via a client or  local machine, for example your laptop or the PC, you need to change the config file first. For that reason you need to lock into your server, you can do this via ssh as well or you are locking in on the server directly. It is always recommendable if you are working with config-files to mack a backup before hand, the easiest way is to simplay copy the file but with a *.backup* written at the end.
+    
+    _1. creating a backupfile_
+    #+BEGIN_SRC bash
+    # go to the directory that holds the concerned file
+    cd /etc/mysql/mariadb.conf.d
+    # create the backup-file
+    sudo cp 50-server.conf 50-server.conf.backup
+    #+END_SRC
+
+    _2. changing the configurationfile_
+    #+BEGIN_SRC bash
+    # open the config file with a texteditor
+      sudo nano /etc/mysql/mariadb.conf.d/50-server.conf
+    #+END_SRC
+    
+    You need to find the entry *bind-address* and comment it out or enter *0.0.0.0* and save the config file. Now save the file and leave the document.
+
+    _3. restart the server_
+    In order for the changes to take affect you need to restart the MariaDB-server. I would recommend to check after the restart if everything is working properly.
+    #+BEGIN_SRC bash
+    # restart the service
+    sudo systemctl restart mariadb
+    # check the status of mariadb
+    sudo systemctl status mariadb
+    # if you are checking it must be enabled and active
+    #+END_SRC
+
+** creating admin for remote access
+    Now you need to create an admin user that can access the DB remotely.
+    _1. find out the IP adress | access the the DB_
+    #+BEGIN_SRC bash
+    # find out your ip and save it somewhere as we are needing it later on
+    ip a
+    # open the DB
+    # open sql with entering the credentials -u [user you want to login with] | -p [password of the user, you will have to enter if you want to login]
+    sudo mysql -u root -p
+    # once you have created a user and you want to login remotely you are changing this a bit into *sudo mysql -u <username> -h <server_ip or hostname> -p <password>* 
+    # the hostname can be taken if you know it or you simply take the ip you previously found out.
+    #+END_SRC
+
+    _2. create the admin user_
+    We are creating the admin user with basically all rights of root, this account should not be shared with anyone.
+    #+BEGIN_SRC sql
+    -- create the user, for locally based DB's you only need to use 'localhost' instead of the 'server_ip'
+    CREATE USER 'admin'@'<server_ip>' IDENTIFIED BY '<password>';
+    -- grant the privileges 'GRANT OPTION' gives the user the ability to grant permissions to users 
+    GRANT ALL ON *.* TO 'admin'@'<server_ip>' IDENTIFIED BY '<password>' WITH GRANT OPTION;
+    -- activate the privileges
+    FLUSH PRIVILEGES;
+    #+END_SRC
+    
+    _3. create additional users_
+    #+BEGIN_SRC sql
+    -- create a random user
+    CREATE USER 'random'@'<server_ip>' IDENTIFIED BY '<password>';
+    -- grant the random user his privileges the first '*' stands for ALL DB's the second '*' stands for ALL tables in the respective DB's. See point 2. I is recommendable to not give any user access to all DB's.
+    GRANT <type_of_permission> ON database_id.table_name TO 'random'@'<server_ip>' IDENTIFIED BY '<password>';
+    -- activate the privileges
+    FLUSH PRIVILEGES;
+    #+END_SRC
